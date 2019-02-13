@@ -54,16 +54,19 @@ def nombre_voisins(X, Y): #compte le nombre de voisin selon différente configur
 
     return voisins
 
+
 def boucle(phase): #boucle de passage de toutes les coordonnées des matrices
     X = 0
     Y = 0
     
     while X < nb :
         while Y < nb :
-
             if phase == 1:
-                voisins_matrice(nombre_voisins(X, Y), X, Y) #remplit une matrice du nombre de voisins correspondant à chaque cellule
+                matrice[X,Y] = request(("Cellule morte 0 ou Vivante 1 pour la cellule à (" + str(X) + " ; " + str(Y) + ") : "), "bin") #initialise la matrice
+                print(matrice) #affiche la matrice
             if phase == 2:
+                voisins_matrice(nombre_voisins(X, Y), X, Y) #remplit une matrice du nombre de voisins correspondant à chaque cellule
+            if phase == 3:
                 dead_or_alive(X, Y) #détermine si une cellule doit vivre ou mourir (dead or alive)
 
             Y += 1
@@ -71,23 +74,29 @@ def boucle(phase): #boucle de passage de toutes les coordonnées des matrices
 
         X += 1
         Y = 0
+        
 
-def request(string, etat):
-    demande = 1
-    if etat == "nb":
-        demande = input(string)
-        if demande.isdecimal() :
-            return demande
-        else:
-            print("Error : veuillez entre un nombre entier naturel")
-            request(string, "nb")
-    if etat == "bin":
-        demande = input(string)
-        if demande == "0" or demande == "1":
-            return demande
-        else:
-            print("Error : veuillez entrer 0 ou 1")
-            request(string, "bin")
+def request(string, etat): #vérification de la conformité des valeurs de l'utilisateur
+    while True:
+        demande = input(string) #énonce la phrase
+
+        if etat == "nb": #signifie que la valeur doit être un entier
+            try: #essaye
+                int(demande)   #test si la valeur est un entier
+                return np.sqrt(int(demande)**2) #renvoi la valeur normalisé
+                break #stop la boucle
+            except: #si il y a une exception
+                print("Error : Veuillez entrer un nombre entier")  #affiche la condition et recommence
+                
+        if etat == "bin": #signifie que la valeur doit être 0 ou 1
+            try: #essaye
+                int(demande) #test si la valeur est un entier
+                if int(demande) == 0 or int(demande) == 1: #test si la valeur est 0 ou 1
+                    return demande #renvoi la valeur
+                    break #stop la boucle
+            except: #si il y a une exception
+                print("Error : Veuillez entrer 0 ou 1") #affiche la condition et recommence
+                
 
 def dead_or_alive(X,Y): #fonction de décision de vie ou de mort d'une cellule
     if matrice_voisins[X, Y] == 3 and matrice[X, Y] == 0 : #conditions de vie
@@ -95,37 +104,24 @@ def dead_or_alive(X,Y): #fonction de décision de vie ou de mort d'une cellule
     if matrice_voisins[X, Y] != 3 and matrice_voisins[X, Y] != 2 and matrice[X, Y] == 1 : #conditions de mort
         matrice[X, Y] = 0 #la cellule meurt
 
+
 def voisins_matrice(voisins, X, Y): #fonction qui assigne à chaque cellule sont nombre de voisins dans une matrice
     matrice_voisins[X,Y] = voisins #assignation du nombre de voisins dans la cellule correspondant à la position actuel dans notre matrice principale
     #print (voisins)
     #print ("matrice voisins = \n" + str(matrice_voisins))
+    
 
 def comparaisons(listpos): #fonction de comparaison des cellules aux allantours de la cellule visée afin de déterminer le nombvre de voisins 
     voisins = 0
     for i in listpos: #passage dans les éléments de la liste de cellule voisines
         if i == 1 :
-            voisins += 1 
+            voisins += 1
     return voisins
 
+
 def affichage_et_init(): #affichage et initialisation de la matrice principale
-    X = 0
-    Y = 0
-
-    print("Voici la grille vierge : ")
-    print(matrice)
-    while (X < nb):
-        while (Y < nb):
-            matrice[X,Y] = int(request(("Cellule morte 0 ou Vivante 1 pour la cellule à (" + str(X) + " ; " + str(Y) + ") : "), "bin"))
-            Y += 1
-            print(matrice)
-
-        Y = 0
-        X += 1
-    print("Initialization Completed...")
-    X = 0
-    Y = 0
-
-    print(matrice)
+    print("Voici la grille vierge : \n" + str(matrice)) #affiche la matrice initialisé vierge
+    boucle(1) #utilisation de la fonction boucle en phase 1
     return matrice
 
 
@@ -135,17 +131,18 @@ def start(Gene): #fonction de lancement du jeu de la vie
 
     while B_un < Gene : #boucle de génération
 
-        boucle(1) #utilisation de la fonction boucle en phase 1
         boucle(2) #utilisation de la fonction boucle en phase 2
+        boucle(3) #utilisation de la fonction boucle en phase 3
 
         B_un += 1
 
-        print("\n \n Génération " + str(B_un) + " Matrice finale : ")
-        print (matrice) #matrice finale après chaque génération
+        print("\n \n Génération " + str(B_un) + " Matrice finale : \n" + str(matrice)) #matrice finale après chaque génération
+
+        
 
 while True: #répétition indfinie du processus
-    nb = int(request(("Entre la taille de la grille vous souhaitez avoir : "), "nb")) #demande de la taille de la matrice carrée
-    Gene = int(request(("Entre le nombre de generation que vous souhaitez afficher : "), "nb")) #demande du nombre de génération
+    nb = int(request("Entre la taille de la grille que vous souhaitez avoir : ", "nb")) #demande de la taille de la matrice carrée
+    Gene = int(request("Entre le nombre de generation que vous souhaitez afficher : ", "nb")) #demande du nombre de génération
 
     matrice = np.zeros((nb,nb)) #remplissage de la matrice principale par des zeros selon la taille donnée
     matrice_voisins = np.zeros((nb,nb)) #remplissage de la matrice des voisins par des zeros selon la taille donnée
